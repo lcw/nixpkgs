@@ -29,8 +29,8 @@ let
   pname = "faiss";
   version = "1.7.4";
 
-  inherit (cudaPackages) cudaFlags backendStdenv;
-  inherit (cudaFlags) cudaCapabilities dropDot;
+  inherit (cudaPackages) backendStdenv;
+  inherit (cudaPackages.cudaFlags) cmakeCudaArchitecturesString;
 
   stdenv = if cudaSupport then backendStdenv else inputs.stdenv;
 
@@ -93,7 +93,7 @@ stdenv.mkDerivation {
     "-DFAISS_ENABLE_PYTHON=${if pythonSupport then "ON" else "OFF"}"
     "-DFAISS_OPT_LEVEL=${optLevel}"
   ] ++ lib.optionals cudaSupport [
-    "-DCMAKE_CUDA_ARCHITECTURES=${builtins.concatStringsSep ";" (map dropDot cudaCapabilities)}"
+    "-DCMAKE_CUDA_ARCHITECTURES=${cmakeCudaArchitecturesString}"
     "-DCUDAToolkit_INCLUDE_DIR=${cudaJoined}/include"
   ];
 

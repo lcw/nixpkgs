@@ -123,10 +123,9 @@ effectiveStdenv.mkDerivation (finalAttrs: {
   ]
       ++ optionals cudaSupport [
         (
-          with cudaPackages.flags;
-          cmakeFeature "CMAKE_CUDA_ARCHITECTURES" (
-            builtins.concatStringsSep ";" (map dropDot cudaCapabilities)
-          )
+          cmakeFeature
+          "CMAKE_CUDA_ARCHITECTURES"
+          cudaPackages.cudaFlags.cmakeCudaArchitecturesString
         )
       ]
       ++ optionals rocmSupport [

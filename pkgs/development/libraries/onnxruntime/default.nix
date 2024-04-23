@@ -29,10 +29,7 @@ let
   stdenv = throw "Use effectiveStdenv instead";
   effectiveStdenv = if cudaSupport then cudaPackages.backendStdenv else inputs.stdenv;
 
-  cudaCapabilities = cudaPackages.cudaFlags.cudaCapabilities;
-  # E.g. [ "80" "86" "90" ]
-  cudaArchitectures = (builtins.map cudaPackages.cudaFlags.dropDot cudaCapabilities);
-  cudaArchitecturesString = lib.strings.concatStringsSep ";" cudaArchitectures;
+  inherit (cudaPackages.cudaFlags) cmakeCudaArchitecturesString;
 
   howard-hinnant-date = fetchFromGitHub {
     owner = "HowardHinnant";
@@ -190,7 +187,7 @@ effectiveStdenv.mkDerivation rec {
   ] ++ lib.optionals cudaSupport [
     (lib.cmakeFeature "FETCHCONTENT_SOURCE_DIR_CUTLASS" "${cutlass}")
     (lib.cmakeFeature "onnxruntime_CUDNN_HOME" "${cudaPackages.cudnn}")
-    (lib.cmakeFeature "CMAKE_CUDA_ARCHITECTURES" cudaArchitecturesString)
+    (lib.cmakeFeature "CMAKE_CUDA_ARCHITECTURES" cmakeCudaArchitecturesString)
     (lib.cmakeFeature "onnxruntime_NVCC_THREADS" "1")
   ];
 

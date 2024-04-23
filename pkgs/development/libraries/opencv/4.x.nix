@@ -521,7 +521,7 @@ effectiveStdenv.mkDerivation {
   # see https://github.com/NixOS/nixpkgs/issues/276691
   + lib.optionalString (!enableCuda) ''
     mkdir -p "$cxxdev/nix-support"
-    echo "''${!outputDev}" >> "$cxxdev/nix-support/propagated-build-inputs"
+    printWords "''${!outputDev}" >> "$cxxdev/nix-support/propagated-build-inputs"
   ''
   # install python distribution information, so other packages can `import opencv`
   + lib.optionalString enablePython ''

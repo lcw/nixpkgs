@@ -16,7 +16,7 @@
 }:
 
 let
-  inherit (cudaPackages) cudnn cutensor nccl;
+  inherit (cudaPackages) cudnn libcutensor nccl;
   cudatoolkit-joined = symlinkJoin {
     name = "cudatoolkit-joined-${cudaPackages.cudaVersion}";
     paths = with cudaPackages; [
@@ -72,7 +72,7 @@ buildPythonPackage rec {
   buildInputs = [
     cudatoolkit-joined
     cudnn
-    cutensor
+    libcutensor
     nccl
   ];
 
