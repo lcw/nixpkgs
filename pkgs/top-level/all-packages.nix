@@ -36803,7 +36803,6 @@ with pkgs;
 
   katagoWithCuda = katago.override {
     backend = "cuda";
-    cudaPackages = cudaPackages_12;
   };
 
   katagoCPU = katago.override {
@@ -36812,7 +36811,6 @@ with pkgs;
 
   katagoTensorRT = katago.override {
     backend = "tensorrt";
-    cudaPackages = cudaPackages_12;
   };
 
   klavaro = callPackage ../games/klavaro { };
