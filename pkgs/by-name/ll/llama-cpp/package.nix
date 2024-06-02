@@ -47,15 +47,8 @@ let
 
    cudaBuildInputs = with cudaPackages; [
     cuda_cccl.dev # <nv/target>
-
-    # A temporary hack for reducing the closure size, remove once cudaPackages
-    # have stopped using lndir: https://github.com/NixOS/nixpkgs/issues/271792
-    cuda_cudart.dev
-    cuda_cudart.lib
-    cuda_cudart.static
-    libcublas.dev
-    libcublas.lib
-    libcublas.static
+    cuda_cudart
+    libcublas
   ];
 
   rocmBuildInputs = with rocmPackages; [
