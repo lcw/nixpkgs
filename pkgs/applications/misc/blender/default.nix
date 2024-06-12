@@ -15,7 +15,6 @@
   config,
   cudaPackages,
   cudaSupport ? config.cudaSupport,
-  darwin,
   dbus,
   embree,
   fetchurl,
