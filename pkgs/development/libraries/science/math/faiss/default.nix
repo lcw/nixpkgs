@@ -9,7 +9,6 @@
 , pythonSupport ? true
 , pythonPackages
 , llvmPackages
-, boost
 , blas
 , swig
 , addOpenGLRunpath
