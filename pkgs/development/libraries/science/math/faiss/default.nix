@@ -25,6 +25,8 @@
 }@inputs:
 
 let
+  inherit (lib.strings) cmakeBool cmakeFeature cmakeOptionType;
+
   inherit (cudaPackages) backendStdenv;
   inherit (cudaPackages.cudaFlags) cmakeCudaArchitecturesString;
 
@@ -86,12 +88,12 @@ stdenv.mkDerivation (finalAttrs: {
   ];
 
   cmakeFlags = [
-    "-DFAISS_ENABLE_GPU=${if cudaSupport then "ON" else "OFF"}"
-    "-DFAISS_ENABLE_PYTHON=${if pythonSupport then "ON" else "OFF"}"
-    "-DFAISS_OPT_LEVEL=${optLevel}"
+    (cmakeBool "FAISS_ENABLE_GPU" cudaSupport)
+    (cmakeBool "FAISS_ENABLE_PYTHON" pythonSupport)
+    (cmakeFeature "FAISS_OPT_LEVEL" optLevel)
   ] ++ lib.optionals cudaSupport [
-    "-DCMAKE_CUDA_ARCHITECTURES=${cmakeCudaArchitecturesString}"
-    "-DCUDAToolkit_INCLUDE_DIR=${cudaJoined}/include"
+    (cmakeFeature "CMAKE_CUDA_ARCHITECTURES" cmakeCudaArchitecturesString)
+    (cmakeOptionType "PATH" "CUDAToolkit_INCLUDE_DIR" "${cudaJoined}/include")
   ];
 
 
