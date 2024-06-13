@@ -140,8 +140,12 @@ effectiveStdenv.mkDerivation (finalAttrs: {
     libcurand # curand.h
     libcusparse # cusparse.h
     libcufft # cufft.h
-    cudnn # cudnn.h
     cuda_cudart
+
+    # NOTE: As of release 1.16.3, this package is incompatible with CUDNN 9.x
+    # TODO(@connorbaker): Shouldn't have to explicitly include the `dev` output for the headers to get picked up!
+    cudnn_8.dev # cudnn.h
+    cudnn_8.lib # -lcudnn
   ]);
 
   nativeCheckInputs = [
@@ -187,7 +191,6 @@ effectiveStdenv.mkDerivation (finalAttrs: {
     (cmakeBool "onnxruntime_ENABLE_PYTHON" pythonSupport)
   ] ++ lib.optionals cudaSupport [
     (cmakeOptionType "PATH" "FETCHCONTENT_SOURCE_DIR_CUTLASS" cutlass.outPath)
-    (cmakeOptionType "PATH" "onnxruntime_CUDNN_HOME" cudaPackages.cudnn.outPath)
     (cmakeFeature "CMAKE_CUDA_ARCHITECTURES" cmakeCudaArchitecturesString)
     (cmakeFeature "onnxruntime_NVCC_THREADS" "1")
   ];
@@ -206,8 +209,18 @@ effectiveStdenv.mkDerivation (finalAttrs: {
   postPatch = ''
     substituteInPlace cmake/libonnxruntime.pc.cmake.in \
       --replace-fail '$'{prefix}/@CMAKE_INSTALL_ @CMAKE_INSTALL_
-  '' + lib.optionalString (effectiveStdenv.hostPlatform.system == "aarch64-linux") ''
-    # https://github.com/NixOS/nixpkgs/pull/226734#issuecomment-1663028691
+  ''
+  # We don't use or set a single onnxruntime_CUDA_HOME directory, so do not add it to the list of link directories.
+  # Without this removal, the generated cmake_install.cmake used during the install phase tries to run an RPATH_CHANGE
+  # command which fails because the directory does not exist in the RPATH.
+  + lib.optionalString cudaSupport ''
+    substituteInPlace cmake/external/onnxruntime_external_deps.cmake \
+      --replace-fail \
+        'list(APPEND onnxruntime_LINK_DIRS ''${onnxruntime_CUDA_HOME}/lib64)' \
+        ""
+  ''
+  # https://github.com/NixOS/nixpkgs/pull/226734#issuecomment-1663028691
+  + lib.optionalString (effectiveStdenv.hostPlatform.system == "aarch64-linux") ''
     rm -v onnxruntime/test/optimizer/nhwc_transformer_test.cc
   '';
 
