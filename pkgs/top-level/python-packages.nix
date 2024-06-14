@@ -15310,9 +15310,19 @@ self: super: with self; {
 
   toposort = callPackage ../development/python-modules/toposort { };
 
-  torch = callPackage ../development/python-modules/torch {
+  torch = callPackage ../development/python-modules/torch rec {
+    inherit (pkgs.config) cudaSupport rocmSupport;
     inherit (pkgs.darwin.apple_sdk.frameworks) Accelerate CoreServices;
     inherit (pkgs.darwin) libobjc;
+    cudaPackages = pkgs.cudaPackages_12_1;
+    magma =
+      if cudaSupport then
+        pkgs.magma-cuda-static
+      else if rocmSupport then
+        pkgs.magma-hip
+      else
+        pkgs.magma;
+    openai-triton = self.openai-triton.override { inherit cudaSupport; };
   };
 
   torch-audiomentations = callPackage ../development/python-modules/torch-audiomentations { };
@@ -15326,7 +15336,6 @@ self: super: with self; {
   torchsnapshot = callPackage ../development/python-modules/torchsnapshot { };
 
   torchWithCuda = self.torch.override {
-    openai-triton = self.openai-triton-cuda;
     cudaSupport = true;
     rocmSupport = false;
   };
@@ -15336,7 +15345,6 @@ self: super: with self; {
   };
 
   torchWithRocm = self.torch.override {
-    openai-triton = self.openai-triton-no-cuda;
     rocmSupport = true;
     cudaSupport = false;
   };
