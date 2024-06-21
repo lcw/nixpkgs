@@ -54,11 +54,11 @@ in
 
   postPatch =
     prevAttrs.postPatch or ""
-    + ''
-      for path in $rmPatterns; do
-        rm -r "$path"
-      done
-    ''
+    # + ''
+    #   for path in $rmPatterns; do
+    #     rm -r "$path"
+    #   done
+    # ''
     + ''
       patchShebangs nsight-systems
     '';
@@ -103,22 +103,6 @@ in
       moveToOutput 'nsight-systems/${versionString}/target-linux-*' "''${!outputBin}"
       substituteInPlace $bin/bin/nsys $bin/bin/nsys-ui \
         --replace-fail 'nsight-systems-#VERSION_RSPLIT#' nsight-systems/${versionString}
-      for qtlib in $bin/nsight-systems/${versionString}/host-linux-x64/Plugins/*/libq*.so; do
-        qtdir=$(basename $(dirname $qtlib))
-        filename=$(basename $qtlib)
-        for qtpkgdir in ${
-          lib.concatMapStringsSep " " (x: qt6Packages.${x}) [
-            "qtbase"
-            "qtimageformats"
-            "qtsvg"
-            "qtwayland"
-          ]
-        }; do
-          if [ -e $qtpkgdir/lib/qt-6/plugins/$qtdir/$filename ]; then
-            ln -snf $qtpkgdir/lib/qt-6/plugins/$qtdir/$filename $qtlib
-          fi
-        done
-      done
     '';
 
   brokenConditions = prevAttrs.brokenConditions // {
