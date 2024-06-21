@@ -120,6 +120,13 @@ in
       ucx
     ]
     ++ optionals (versionAtLeast version "2023.1") [ gst_all_1.gst-plugins-base ];
+  postInstall =
+    # 1. Move dependencies of ncu, ncu-ui binaries to bin output
+    prevAttrs.postInstall or ""
+    + ''
+      moveToOutput 'nsight-compute' "''${!outputBin}"
+    '';
+
   badPlatformsConditions =
     prevAttrs.badPlatformsConditions
     // utils.mkMissingPackagesBadPlatformsConditions (
